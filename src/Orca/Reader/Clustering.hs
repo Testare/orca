@@ -104,6 +104,7 @@ drawPixel kcls nextPx = fst $ head $ sortWith snd distPxs
 
 drawCluster :: Image PixelRGB8 -> KCluster -> Image PixelRGB8
 drawCluster img kcs = pixelMap (drawPixel kcs) img
+
 {- Do clustering -}
 
 runKIterations :: Int -> KCluster -> Image PixelRGB8 -> KCluster
@@ -132,63 +133,7 @@ pixelDistance1 (PixelRGB8 r1 g1 b1) (PixelRGB8 r2 g2 b2) = (diff r1 r2) + (diff 
 pixelDistance3 (PixelRGB8 r1 g1 b1) (PixelRGB8 r2 g2 b2) = (diff r1 r2) + (diff g1 g2) + (diff b1 b2)
         where diff a b = abs $ (((fromIntegral b) - (fromIntegral a)))^3
 
-
-
 randomPixels ::  (RandomGen r) => r -> Image PixelRGB8 -> [PixelRGB8]
 randomPixels rand img = getZipList $ pixelAt img <$> xGen <*> yGen 
     where xGen = ZipList $ randomRs (0, imageWidth img) rand
           yGen = ZipList $ randomRs (0, imageHeight img) rand
-
-{- Failed distance metrics
-
--- Produces noise X[
-pixelDistance4 (PixelRGB8 r1 g1 b1) (PixelRGB8 r2 g2 b2) = (diff (floor k*r1) r2) + (diff (floor k*g1) g2) + (diff (floor k*b1) b2)
-        where k = (r1*r2 + g1*g2 + b1*b2)%(2*(r1*r1+g1*g1+b1*b1))
-              diff a b = ((fromIntegral b) - (fromIntegral a))^2
-
-pixelDistance5 (PixelRGB8 r1 g1 b1) (PixelRGB8 r2 g2 b2) = 2*(diff r1 r2) + 4*(diff g1 g2) + 3*(diff b1 b2)
-        where diff a b = ((fromIntegral b) - (fromIntegral a))^2
-
-
-pixelDistance6 (PixelRGB8 r1 g1 b1) (PixelRGB8 r2 g2 b2) = (diff r1 r2) + (diff g1 g2) + (diff b1 b2)
-        where diff a b =  (x - y) * (x - y) * (x - y)
-                where x = fromIntegral a
-                      y = fromIntegral b
-
-        -- Dunt werk
-pixelDistance2 (PixelRGB8 r1 g1 b1) (PixelRGB8 r2 g2 b2) = (diff r1 r2) + (diff g1 g2) + (diff b1 b2)
-        where diff a b = abs $ (fromIntegral a) - (fromIntegral b)
-
-pixelDistanceByShade (PixelRGB8 r1 g1 b1) (PixelRGB8 r2 g2 b2) = diff (r1+g1+b1) (r2+g2+b2)
-        where diff a b = ((fromIntegral b) - (fromIntegral a))^2
--}
-
-{-runClusterOnImage :: String -> Int -> IO ()
-runClusterOnImage imageSource n = do
-    image <- readImage imageSource :: IO (Either String DynamicImage)-- Either String DynamicImage
-    flip (either (putStrLn . (++ "Error: "))) (convertRGB8 <$> image) $ do
-        report <- kClusterPixels n colorClusterReport
-        drawCluster <- drawClusterImage
-        let (KMeansPixelReport kMeans) = report
-            (KMeansPixelReport bKMeans) = binaryReport
-            whiteImage = drawCluster (bKMeans !! 0)
-            --blackImage = drawCluster (kMeans !! 1)
-            redImage = drawCluster (kMeans !! 0)
-            greenImage = drawCluster (kMeans !! 1)
-            blueImage = drawCluster (kMeans !! 2)
-        return $ do
-            putStrLn "Processing..."
-            putStrLn $ (++) "Red Average: " $ show $ fromPixel $ averagePixel (kMeans !! 0)
-            putStrLn $ (++) "Green Average: " $ show $ fromPixel $ averagePixel (kMeans !! 1)
-            putStrLn $ (++) "Blue Average: " $ show $ fromPixel $ averagePixel (kMeans !! 2)
-            putStrLn $ (++) "White Average: " $ show $ fromPixel $ averagePixel (bKMeans !! 0)
-            putStrLn "Drawing red!"
-            writePng testRedImageTarget redImage
-            putStrLn "Drawing green!"
-            writePng testGreenImageTarget greenImage
-            putStrLn "Drawing blue!"
-            writePng testBlueImageTarget blueImage
-            putStrLn "Drawing white!"
-            writePng testWhiteImageTarget whiteImage
-            putStrLn "Finished!"
-            -}
