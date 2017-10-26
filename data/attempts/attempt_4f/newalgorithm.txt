@@ -1,0 +1,17 @@
+Testare-Mac:orca Owner$ time stack exec orca-concept
+[MeanCluster (PixelRGB8 167 159 113) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 163 159 114) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 22 17 13) APX{A[0/0]A[0/0]A[0/0]}
+]
+[MeanCluster (PixelRGB8 167 159 113) APX{A[859043828/4459797]A[826861688/4459797]A[619003355/4459797]}
+,MeanCluster (PixelRGB8 163 159 114) APX{A[77008839/532500]A[73916127/532500]A[57657100/532500]}
+,MeanCluster (PixelRGB8 22 17 13) APX{A[102400028/2997975]A[88257564/2997975]A[76359098/2997975]}
+]
+[MeanCluster (PixelRGB8 192 185 138) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 144 138 108) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 34 29 25) APX{A[0/0]A[0/0]A[0/0]}
+]
+
+real    0m42.112s
+user    1m23.506s
+sys     0m41.057s

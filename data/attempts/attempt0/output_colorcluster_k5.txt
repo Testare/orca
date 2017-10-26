@@ -1,0 +1,9 @@
+Drawing red!
+Average: (246,218,204)
+Drawing green!
+Average: (29,38,40)
+Drawing blue!
+Average: (124,80,64)
+Drawing white!
+Average: (240,206,189)
+Finished!

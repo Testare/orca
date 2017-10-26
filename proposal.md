@@ -2,7 +2,7 @@
 % Logan Woodbury
 
 # Contact Information
-  
+
   -------- ---------------------
   Name     Logan Woodbury
   Phone    (740)-837-8273
@@ -30,7 +30,7 @@ Now, I'll try my best to approximate that idea.
 ## Components
 This project really has 3 components: The OCR (Reader), the graphemes (Characters), designing the language and making interpretters (Language)
 
-### Orca Reader 
+### Orca Reader
 The purpose of this component is to create the software that can take a given image and...:
 * Determine what part of the image is the text
 * Fragment the text image into discrete parts (the graphemes)
@@ -62,7 +62,7 @@ One major consideration for this project is that what the typical use case of th
 
 One ideal of this project is that there will be two interpretters for the language. This will help verify the language specification so that things that are ambiguous and assumed with one language aren't generally assumed.
 
-### Orca Environment
+### Orca Environment?
 Certain constraints exist in the physical world that don't exist in the computer world. One example of these is the length of paper: One sheet of paper has about ~33 lines. In comparison, even the smallest code files cover multiple hundreds of lines. Alternatives to compensate for these constraints might have to be created. One possibility would be to limit the content of a page: It must contain only complete function definitions or language directives. Then when we read photos in, they get added to an environment that holds all the functions and language directives scanned to that point. The functions can be tested from this environment, and if they work well they can be appended to other library files, or used as the main method of an executable. Then user defined functions could be added to their own standard "bin," and then invoked directly by writing the function name on a paper, taking a picture, and choosing to "execute" it.
 
 This would certainly go along with the idea that the user is writing quick little "scripts" rather than huge software projects in this language.
@@ -81,7 +81,9 @@ The overall quality of Project Orca can be determined by the following criteria:
 * Language Appropriateness - Is the langauge a good match for the constraints of a written programming language, and those who might use one?
 * Language Functionality - What is the language capable of? Are there restrictions on what it can do? Is it practical to use? Is it extensible with libraries?
 * Langauge Explicitness - Is the language definition clear and unambiguous?
+* Holistic Functionality - Is Orca a tool others might use?
 * Holistic Motivation - Is Orca fun to use? Why would somebody use Orca?
+* Research Value - Was much learned through this project?
 
 ## Scope
 ### Goals
@@ -98,6 +100,7 @@ The overall quality of Project Orca can be determined by the following criteria:
 
 ### Non-goals
 * Create a language to introduce people to programming
+* Create the most user-friendly language
 
 # Significance
 My reasons for believing this project to be significant are mainly summarized in the background section. I believe that creating explicit ways for humans to communicate arbitrarily with machines will be a key part in the future development of technology, since it already basically is one way that technology is progressing (Smart homes, voice commands on phone, etc). I believe this could be significant in that it pushes what has already been realized on this front, and could be a stepping stone for something that changes how society interacts with computers.
@@ -115,15 +118,62 @@ Lastly, at least part of this project will be done in languages that are still a
 If you can read the rest of this proposal and not get the impression of how interesting this is to me, then I don't think I can convince you in any lines here.
 
 # Tasks and Schedule
+This project is to be completed over two semesters.
 
-## ORCA - Reader
+## General tasks
+* **[9-23 Oct, 4 hours]** Determine which are the main use cases for this software
+* **[23 Oct-6 Nov, 4 hours]** Create vision for final product
+* **[6-27 Nov, 8 hours]** Write Requirements Specifications
 
-## ORCA - Characters
+Total: 16 hours
 
-## ORCA - Accomplishment
+## ORCA Reader [First Semester]
+* **[9-23 Oct, 16 hours]** Identification of what part of the image is text (Where text is in the image)
+* **[23-30 Oct, 8 hours]** Normalization of text (Color normalization, orientation correction)
+* **[30 Oct-6 Nov, 8 hours]** Separation of text into characters
+* **[6-27 Nov, 16 hours]** Define basic algorithm for identification of characters, with acceptance of training data for the characters
+
+Total: 48 hours
+
+## ORCA Characters [First Semester]
+* **[13-20 Nov, 4 hours]** Prepare data for many different potential characters
+* **[20-27 Nov, 4 hours]** Measure the effiency of writing the different characters
+* **[27 Nov-4 Dec, 4 hours]** Run tests of accuracy on different characters sets for different sizes (It'll probably be about 4 hours to get automated tests set up, though the automated tests will likely take longer)
+* **[4-11 Dec, 2 hours]** Determine the best character set (Highest size, accuracy, and effeciency). Probably with a few options, for the orca language
+
+Total: 14 hours
+
+## ORCA Language [Second Semester]
+* **[8 hours]** Research different language paradigms, determine some for the language
+* **[16 hours]** Research how language interpretters work (Such as their data structures)
+* **[4 hours]** Create the minimal language specification
+* **[4 hours]** Create interpretter to determine if syntax is valid for the language (To catch "compiler error" type problems, can be run to test a script's validity without having to actually run the script)
+* **[16 hours]** Create interpretter to execute an orca script file
+* **[? hours]** Expand the language specification, while improving the interpretter(s)
+
+Total: 48+ hours
+
+## Totals
+126+ hours pending
+
+(+ 34 already accomplished = 160+ hours)
+
+Keep in mind these are all very rough estimates, as I have not done much work on a project like this before.
 
 # Required Resources with Costs
 A camera is needed to get a picture of the handwritten text. (Already owned)
 
 # References
 
+## OCR
+
+* Color Segmentation of Images Using K-Means Clustering With Different Color Spaces[https://www.cs.bgu.ac.il/~ben-shahar/Teaching/Computational-Vision/StudentProjects/ICBV121/ICBV-2012-1-OfirNijinsky-AvivPeled/report.pdf]
+* Wikipedia: Maximally Stable External Regions [https://en.wikipedia.org/wiki/Maximally_stable_extremal_regions]
+* Wikipedia: Feature Detection [https://en.wikipedia.org/wiki/Feature_detection_(computer_vision)]
+* Wikipedia: Document layout analysis [https://en.wikipedia.org/wiki/Document_layout_analysis]
+* Image Segmentation [https://cs.gmu.edu/~kosecka/cs682/lect-segmentation-part1.pdf]
+* Font and background indepedent text binarization [https://www.researchgate.net/profile/Thotreingam_Kasar/publication/228680780_Font_and_background_color_independent_text_binarization/links/0fcfd5081158485343000000/Font-and-background-color-independent-text-binarization.pdf]
+
+## Language
+* Write you a Haskell [http://dev.stephendiehl.com/fun/index.html]
+* Implementing a JIT compiled language using Haskell and LLVM [http://www.stephendiehl.com/llvm/]
