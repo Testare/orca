@@ -2,10 +2,21 @@ module Orca.Testing where
 import Orca.Reader.Clustering
 import Codec.Picture
 import Codec.Picture.Types
+import System.IO
 
 testImageSource = "./test_source4.png"
 testBigImageSource = "./test_source.JPG"
+
+attemptDirectory = "./data/attempts/"
+greyAttemptDirectory = attemptDirectory ++ "grey/"
+greyAttemptCounter = greyAttemptDirectory ++ "counter.txt"
+counterFile = "counter.txt"
+
+targetFile = "_target.png"
+histogramFile = "_stats.txt"
+
 testImageTarget = "./test_target.png"
+
 testImageTarget2 = "./test_target2.png"
 testImageTarget3 = "./test_target3.png"
 testBlackImageTarget = "./black_target.png"
@@ -13,9 +24,18 @@ testWhiteImageTarget = "./white_target.png"
 testRedImageTarget = "./red_target.png"
 testGreenImageTarget = "./green_target.png"
 testBlueImageTarget = "./blue_target.png"
-testGrayImageTarget = "./test_gray_target.png"
+testGrayImageTarget = "./test_target_gray.png"
 
-exampleMeanCluster = MeanCluster (PixelRGB8 255 0 127) mempty
-exampleMeanCluster1 = MeanCluster (PixelRGB8 125 0 255) mempty
-exampleClusters = [exampleMeanCluster, exampleMeanCluster1]
-examplePixel = PixelRGB8 240 0 200
+getCounter :: FilePath -> IO Int
+{-getCounter counterFile = do
+    counterHandle <- openFile counterFile ReadMode
+    contents <- hGetContents counterHandle
+    return $ read contents
+    -}
+getCounter counterFile = withFile counterFile ReadMode (\handle -> (hGetLine handle) >>= (return . read))
+
+setCounter :: FilePath -> Int -> IO ()
+setCounter counterFile = writeFile counterFile . show
+
+incCounter :: FilePath -> IO ()
+incCounter counterFile = (getCounter counterFile) >>= (setCounter counterFile . succ)

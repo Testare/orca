@@ -116,11 +116,6 @@ runKIterations n kcls img = runKIterations (pred n) nextKcls img
 kRandomClusters :: (RandomGen r) => Int -> r -> Image PixelRGB8 -> [MeanCluster]
 kRandomClusters k rand img = seedPixelsToClusters $ take k $ randomPixels rand img
 
-tryWithImage :: String -> (Image PixelRGB8 -> IO ()) -> IO ()
-tryWithImage filepath f = do
-    image <- readImage filepath
-    either (putStrLn . (mappend "Error with file: ")) f (convertRGB8 <$> image)
-
 {-Adjustable parameters-}
 
 pixelDistance :: PixelMetric -> Int -> Int -> PixelRGB8 -> PixelRGB8 -> Int

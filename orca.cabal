@@ -15,15 +15,29 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
+  ghc-options:         -XFlexibleContexts
   exposed-modules:     Lib
                      , Main.Start
                      , Orca.Reader.Clustering
+                     , Orca.Reader.Processing
+                     , Orca.Reader.Greyscale
                      , Orca.Testing
   build-depends:       base >= 4.7 && < 5
                      , JuicyPixels
+                     , hip >= 1.5
                      , random
                      , containers
   default-language:    Haskell2010
+executable grey
+  hs-source-dirs:      app
+  main-is:             concept/grey.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -XFlexibleContexts
+  build-depends:       base
+                     , orca
+                     , JuicyPixels
+                     , random
+  default-language:    Haskell2010
+
 
 executable orca-concept
   hs-source-dirs:      app

@@ -1,15 +1,11 @@
 import Orca.Reader.Clustering
+import Orca.Reader.Processing
+import Orca.Reader.Greyscale
 import Orca.Testing
 import System.Random
 import Codec.Picture
 
 
-grayScalePx :: PixelRGB8 -> PixelRGB8
-grayScalePx (PixelRGB8 r g b ) = PixelRGB8 gray gray gray
-    where gray = fromIntegral $ div ((fromIntegral r)*299 + (fromIntegral g)*587 + (fromIntegral b)*114) (1000 :: Int)
-
-convertToGrayscale :: Image PixelRGB8 -> Image PixelRGB8
-convertToGrayscale = pixelMap grayScalePx
 
 main :: IO ()
 main = tryWithImage testImageSource $ \img -> do
@@ -33,8 +29,6 @@ main = tryWithImage testImageSource $ \img -> do
     writePng testImageTarget $ clusterImg
     putStrLn "Writing rainbow.."
     writePng testImageTarget2 $ rainbowImg
-    putStrLn "Writing gray..."
-    writePng testGrayImageTarget $ (convertToGrayscale img)
     putStrLn "Completed!"
 
 
