@@ -1,18 +1,39 @@
-import Codec.Picture
-import Codec.Picture.Types
 import Orca.Reader.Greyscale
 import Orca.Reader.Processing
 import Orca.Testing
+import Graphics.Image.IO
+import Graphics.Image (dims)
+import Data.Int(Int64)
+import qualified Data.Vector.Storable as V
 
 writeHistogram :: FilePath -> [Int] -> IO ()
 writeHistogram fp hsdata = writeFile fp d8ta
     where d8ta = concat $ flip (++) "\n" . show <$> hsdata
 
+main = do
+    putStrLn "Doing a thing"
+    showGrey testImageSource
+    putStrLn "Done the thing"
+
+showGrey :: String -> IO ()
+showGrey str = tryWithGrey str PNG $ \x -> do
+    let threshold = adaptiveThreshold x
+        thresholdImg = getThresholdImg 5 x
+        intVec = getIntegralVector x
+        (h,w) = dims x
+        h1w1 = (pred h, pred w)
+        k = pixelThreshold 5 w h1w1 intVec 3
+
+
+    putStrLn $ show k
+    displayImageUsing defaultViewer True thresholdImg
+
+
+{-
 main :: IO ()
 main = do
     let imgs = [testImageSource, testBigImageSource]
-    putStrLn $ "Use big image? (0=small,1=big)"
-    imgFile <- (readLn) >>= (pure . (imgs !!))
+    putStrLn $ "Use big image? (0=small,1=big)" imgFile <- (readLn) >>= (pure . (imgs !!))
     putStrLn $ "Write stats?(y/n)"
     writeStatsBool <- getLine >>= return . (== "y")
     putStrLn $ "Would you like to apply a threshold? (y/n)"
@@ -40,3 +61,4 @@ main = do
             putStrLn $ "Writing histogram data: " ++ outHs
             writeHistogram outHs hsdata
             else return ()
+-}

@@ -12,16 +12,7 @@ tryWithImage filepath f = do
     image <- JP.readImage filepath
     either (putStrLn . (mappend "Error with file: ")) f (convertRGB8 <$> image)
 
-
-readImg :: Readable img PNG => FilePath -> IO (Either String img)
-readImg = HipIO.readImageExact PNG 
-
 --betterTryWithPNG :: Readable (HipI.Image VS RGB Double) PNG => FilePath
-
-tryWithGrey :: Readable (HipI.Image VS RGB Double) format => String -> format -> (HipI.Image VS Y Double -> IO ()) -> IO ()
-tryWithGrey filepath format f = do
-    image <- (HipIO.readImageExact format filepath) :: IO (Either String (HipI.Image VS RGB Double))
-    either (putStrLn . (mappend "Error with file: ")) (f . toImageY) image
 
 tryWithPNG :: Readable img PNG => String -> (img -> IO ()) -> IO ()
 tryWithPNG = flip tryWithImage2 PNG
