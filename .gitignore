@@ -3,3 +3,4 @@
 *.docx
 /data/attempts/*/*.png
 /data/attempts/*/*_stats.txt
+*.tiff

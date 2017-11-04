@@ -5,6 +5,7 @@ import Codec.Picture.Types
 import System.IO
 
 testImageSource = "./test_source4.png"
+testSecondImageSource = "./test_source2.JPG"
 testBigImageSource = "./test_source.JPG"
 
 attemptDirectory = "./data/attempts/"

@@ -2,7 +2,7 @@ import Orca.Reader.Greyscale
 import Orca.Reader.Processing
 import Orca.Testing
 import Graphics.Image.IO
-import Graphics.Image (dims)
+import Graphics.Image (dims, Bit, X, VS, Image, RGB, Readable, rotate90)
 import Data.Int(Int64)
 import qualified Data.Vector.Storable as V
 
@@ -10,24 +10,36 @@ writeHistogram :: FilePath -> [Int] -> IO ()
 writeHistogram fp hsdata = writeFile fp d8ta
     where d8ta = concat $ flip (++) "\n" . show <$> hsdata
 
+main :: IO ()
 main = do
-    putStrLn "Doing a thing"
-    showGrey testImageSource
-    putStrLn "Done the thing"
+    putStrLn "Enter a divisor"
+    divisor <- readLn
+    putStrLn "Enter a threshold"
+    t <- readLn
+    trySmallDisplay divisor t
+    trySmallTest (display . adaptThresholdPart3) divisor t
+    trySmallTest (display . adaptThresholdPart32) divisor t
+    tryBigDisplay divisor t
+    tryBigTest (display . adaptThresholdPart3 . rotate90) divisor t
+    tryBigTest (display . adaptThresholdPart32 . rotate90) divisor t
 
-showGrey :: String -> IO ()
+tryThresholdingWith :: Readable (Image VS RGB Double) format => String -> format -> (Image VS X Bit -> IO ()) -> Int -> Double -> IO()
+tryThresholdingWith filepath format f divisor t = tryWithGrey filepath format $ f . (adaptiveThresholdRatio divisor t)
+
+tryBigTest = tryThresholdingWith testBigImageSource JPG
+trySmallTest = tryThresholdingWith testImageSource PNG
+trySecondTest = tryThresholdingWith testSecondImageSource JPG
+
+display = displayImageUsing defaultViewer True
+
+tryBigDisplay = tryBigTest (display . rotate90)
+trySmallDisplay = trySmallTest display 
+trySecondDisplay = trySecondTest display
+
+{-showGrey :: String -> IO ()
 showGrey str = tryWithGrey str PNG $ \x -> do
-    let threshold = adaptiveThreshold x
-        thresholdImg = getThresholdImg 5 x
-        intVec = getIntegralVector x
-        (h,w) = dims x
-        h1w1 = (pred h, pred w)
-        k = pixelThreshold 5 w h1w1 intVec 3
-
-
-    putStrLn $ show k
-    displayImageUsing defaultViewer True thresholdImg
-
+    displayImageUsing defaultViewer True threshed
+-}
 
 {-
 main :: IO ()

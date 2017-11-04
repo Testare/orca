@@ -32,6 +32,7 @@ library
 executable grey
   hs-source-dirs:      app
   main-is:             concept/grey.hs
+  default-extensions:  FlexibleContexts
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , orca
