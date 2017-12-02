@@ -1,17 +1,45 @@
 import Orca.Reader.Greyscale
 import Orca.Reader.Processing
+import Orca.Reader.Layout
 import Orca.Testing
 import Graphics.Image.IO
-import Graphics.Image (dims, Bit, X, VS, Image, RGB, Readable, rotate90)
+import Graphics.Image (dims, Bit, X, VS, Image, RGB, RGBA, Readable, rotate90)
+import Graphics.Image.Processing.Filter(sobelOperator,prewittOperator)
+import Graphics.Image.Processing(crop)
+import Graphics.Image.Interface
 import Data.Int(Int64)
 import qualified Data.Vector.Storable as V
+import Data.Monoid(mconcat)
+import Control.Monad(liftM)
+
+main :: IO ()
+main = do
+    putStrLn "/* Choose op */"
+    putStrLn $ displayOps ops
+    integer <- readLn
+    snd $ ops !! integer
 
 writeHistogram :: FilePath -> [Int] -> IO ()
 writeHistogram fp hsdata = writeFile fp d8ta
     where d8ta = concat $ flip (++) "\n" . show <$> hsdata
 
-main :: IO ()
-main = do
+ops :: [(String, IO ())]
+ops = [ ("Grey thresholding", threshMain)
+      , ("Prewitt operator", prewittMain) 
+      , ("Test battery", runFullTests)
+      ]
+
+displayOps :: [(String, IO ())] -> String
+displayOps = disp 0 
+    where disp n [] = ""
+          disp n (x:xs) = (show n) ++ ". " ++ (fst x) ++ "\n" ++ (disp (succ n) xs)
+
+prewittMain :: IO ()
+prewittMain = do
+    tryWithGrey testImageSource PNG $ display . prewittOperator --(\x-> putStrLn "" ) --display
+
+threshMain :: IO ()
+threshMain = do
     putStrLn "Enter a divisor"
     divisor <- readLn
     putStrLn "Enter a threshold"
@@ -30,6 +58,7 @@ tryBigTest = tryThresholdingWith testBigImageSource JPG
 trySmallTest = tryThresholdingWith testImageSource PNG
 trySecondTest = tryThresholdingWith testSecondImageSource JPG
 
+display :: (Writable (Image VS cs e) TIF, Array arr cs e, V.Storable (Pixel cs e)) => Image arr cs e -> IO ()
 display = displayImageUsing defaultViewer True
 
 tryBigDisplay = tryBigTest (display . rotate90)

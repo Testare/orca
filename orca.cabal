@@ -21,6 +21,7 @@ library
                      , Orca.Reader.Clustering
                      , Orca.Reader.Processing
                      , Orca.Reader.Greyscale
+                     , Orca.Reader.Layout
                      , Orca.Testing
   build-depends:       base >= 4.7 && < 5
                      , JuicyPixels
@@ -28,6 +29,7 @@ library
                      , random
                      , containers
                      , vector
+                     , directory
   default-language:    Haskell2010
 executable grey
   hs-source-dirs:      app
