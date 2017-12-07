@@ -74,7 +74,7 @@ testOps :: [Op]
 testOps = [ Op "name" (\img tstcase-> return $ filepath img)
           , Op "charcnt" (\img tstcase-> return $ show $ length $ filepath img)]
 
-testCases = [TestCase]
+testCases :: [TestCase]
 testCases = ["no-params", "extra-no-params"]
 
 testCaseName :: TestCase -> String

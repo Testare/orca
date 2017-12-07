@@ -23,6 +23,7 @@ library
                      , Orca.Reader.Greyscale
                      , Orca.Reader.Layout
                      , Orca.Testing
+                     , Orca.Helper
   build-depends:       base >= 4.7 && < 5
                      , JuicyPixels
                      , hip >= 1.5
