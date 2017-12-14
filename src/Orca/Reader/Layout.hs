@@ -216,7 +216,8 @@ splitImageToStrips_convertVectorToStrips y vec = maybe ss (flip (:) ss) result
 stripsToSymbolData_rowFolding :: (Show a, Enum a, Ord a) => (a, [KeyStrip a], M.Map a SymbolData) -> [YStrip] -> (a, [KeyStrip a], M.Map a SymbolData)
 stripsToSymbolData_rowFolding sData@(a, keys, dataMap) ystrip = (nextA, (reverse nextKeys), nextMap)
                             where foldCollect :: (Show a, Enum a, Ord a) => ([KeyStrip a], (a, [KeyStrip a], M.Map a SymbolData)) -> YStrip -> ([KeyStrip a], (a, [KeyStrip a], M.Map a SymbolData))
-                                  foldCollect (keyss, sData_) ystr = let (keystrip, newData) = stripsToSymbolData_cellFolding sData_ ystr in (keystrip:keyss, newData)
+                                  --foldCollect (keyss, sData_) ystr = let (keystrip, newData) = stripsToSymbolData_cellFolding sData_ ystr in (keystrip:keyss, newData)
+                                  foldCollect = stripsToSymbolData_cellFolding2
                                   (nextKeys, (nextA, _, nextMap)) = foldl foldCollect ([], sData) (reverse ystrip)
 
 stripsToSymbolData_cellFolding :: (Show a, Enum a, Ord a) => (a, [KeyStrip a], M.Map a SymbolData) -> YStrip -> (KeyStrip a, (a, [KeyStrip a], M.Map a SymbolData))
@@ -229,7 +230,6 @@ stripsToSymbolData_cellFolding (a, keys@(keysHead:keysTail), dataMap) ystrip
           headKey = stripKey keysHead
           (nextKeys, nextMap) = foldl (stripsToSymbolData_mergeKeys headKey) (drop (length toMerge) keys, dataMap) (if True || toMerge == [] then toMerge else (error $ "headkey:" ++ (show headKey) ++ "\nkeys" ++ (show keys) ++ "\nmap" ++ (show dataMap) ++  "\n - " ++ (show toMerge)) :: (Show a) =>[a])
 
--- Not safe when newKey == oldKey
 stripsToSymbolData_mergeKeys :: (Ord a) => a -> ([KeyStrip a], M.Map a SymbolData) -> a -> ([KeyStrip a], M.Map a SymbolData)
 stripsToSymbolData_mergeKeys newKey mapState@(keystrips, oldMap) oldKey 
     | newKey == oldKey = mapState
@@ -237,6 +237,26 @@ stripsToSymbolData_mergeKeys newKey mapState@(keystrips, oldMap) oldKey
     where oldSymbolData = M.findWithDefault mempty oldKey oldMap
           updatedMap = M.delete oldKey $ M.adjust (mappend oldSymbolData) newKey oldMap
           correctedStrips = flip map keystrips $ \keystrip-> if (stripKey keystrip) == oldKey then swapKey keystrip newKey else keystrip
+
+stripsToSymbolData_cellFolding2 :: (Show a, Enum a, Ord a) => ([KeyStrip a], (a, [KeyStrip a], M.Map a SymbolData)) -> YStrip -> ([KeyStrip a], (a, [KeyStrip a], M.Map a SymbolData))
+stripsToSymbolData_cellFolding2 (taggedstrips, (a, [], dataMap)) ystrip = ((swapKey ystrip a):taggedstrips, (succ a, [], M.insert a (initializeSymbolFromStrip ystrip) dataMap))
+stripsToSymbolData_cellFolding2 (taggedstrips, (a, keys@(keysHead:keysTail), dataMap)) ystrip
+    | stripMax keysHead < stripMin ystrip = stripsToSymbolData_cellFolding2 (taggedstrips, (a, keysTail, dataMap)) ystrip
+    | stripMax ystrip < stripMin keysHead = ((swapKey ystrip a):taggedstrips, (succ a, keys, M.insert a (initializeSymbolFromStrip ystrip) dataMap))
+    | otherwise = ((swapKey ystrip headKey):nextTagged, (a, nextKeys, M.adjust (appendStripToSymbolData ystrip) headKey nextMap))
+    where toMerge = map stripKey $ takeWhile (checkStripCollision ystrip) keysTail
+          headKey = stripKey keysHead
+          (nextTagged, nextKeys, nextMap) = foldl (stripsToSymbolData_mergeKeys2 headKey) (taggedstrips, drop (length toMerge) keys, dataMap) (if True || toMerge == [] then toMerge else (error $ "headkey:" ++ (show headKey) ++ "\nkeys" ++ (show keys) ++ "\nmap" ++ (show dataMap) ++  "\n - " ++ (show toMerge)) :: (Show a) =>[a])
+
+
+-- Not safe when newKey == oldKey
+stripsToSymbolData_mergeKeys2 :: (Ord a) => a -> ([KeyStrip a], [KeyStrip a], M.Map a SymbolData) -> a -> ([KeyStrip a], [KeyStrip a], M.Map a SymbolData)
+stripsToSymbolData_mergeKeys2 newKey mapState@(taggedstrips, keystrips, oldMap) oldKey 
+    | newKey == oldKey = mapState
+    | otherwise = (correctStrips taggedstrips, correctStrips keystrips, updatedMap)
+    where oldSymbolData = M.findWithDefault mempty oldKey oldMap
+          updatedMap = M.delete oldKey $ M.adjust (mappend oldSymbolData) newKey oldMap
+          correctStrips = map (\keystrip-> if (stripKey keystrip) == oldKey then swapKey keystrip newKey else keystrip)
 
 {-TEST STUFF-}
 
