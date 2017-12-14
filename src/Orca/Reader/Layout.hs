@@ -10,13 +10,17 @@ module Orca.Reader.Layout
     , testSplitting2
     , testMap
     , getSymbolImages
+    , overlaySymbolCoverages
     ) where
 
 import Data.Maybe
 import Data.List as L
 import Data.Ratio
-import Graphics.Image(Image, VS, X, Bit, off, on, dims, isOn)
-import Graphics.Image.Interface(Vector, Pixel, toVector, fromVector, fromIx, new, freeze, write)
+import Data.Tuple(swap)
+
+import Graphics.Image(Image, VS, X, Bit, off, on, dims, isOn, superimpose, fromImagesX)
+import Graphics.Image.Interface(Vector, Pixel, Array, toVector, fromVector, fromIx, new, freeze, write, promote, makeImage, toDouble, Elevator)
+import qualified Graphics.Image.Interface as HIPI(map)
 import Control.Monad.ST(runST)
 import qualified Data.Vector.Storable as V
 import qualified Data.Map as M
@@ -24,19 +28,37 @@ import qualified Data.Map as M
 -- REMOVE SHOW and debugging stuff. Reorganize. Use STData
 
 {-- Public interface -}
+binaryToGrayscale :: Double -> Image VS X Bit -> Image VS X Double
+binaryToGrayscale value = HIPI.map (\x -> if isOn x then valPx else zero) 
+        where valPx = promote value
+              zero = promote 0.0
+
+
 imageToSymbols :: Image VS X Bit -> [Symbol]
 imageToSymbols = map symbolFromData . stripsToSymbolData . splitImageToStrips
 
+symbolCoverageImage :: (Elevator e, Array arr x e) => Image arr x e -> Double -> [Symbol] -> Image VS X Double
+symbolCoverageImage img value symbols = foldl (\accImg sym -> superimpose (swap $ symbolOffset sym) (getSymbolImage sym) accImg) baseImage symbols
+    where baseImage = makeImage (dims img) (const $ promote 0.0) 
+          getSymbolImage = binaryToGrayscale value . symbolImage
+
+overlaySymbolCoverages :: (Elevator e, Array VS cs e, Array VS cs Double) => Image VS X Bit -> Double -> cs -> [([Symbol], e, cs)] -> Image VS cs Double
+overlaySymbolCoverages img baseVal baseColor symbolList = fromImagesX ((baseColor, baseImage):otherXs)
+    where baseImage = binaryToGrayscale baseVal img 
+          otherXs = map (\(symbols, e, cs) -> (cs, symbolCoverageImage img (toDouble e) symbols)) symbolList
 
 {-Symbol Type-}
 
 data Symbol = Symbol
-    { symbolDims :: (Int, Int)
+    { symbolDims :: (Int, Int) --height, width
     , symbolOffset :: (Int, Int)
     , symbolImage :: Image VS X Bit
     , symbolWeight :: Int
     , symbolDensity :: Ratio Int
     }
+
+instance Show Symbol where
+    show (Symbol (h,w) (x,y) _ weight density) = (show w) ++ 'x':(show h) ++ ' ':(show (x,y)) ++ ' ':'w':':':(show weight) ++ ' ':'D':':':(show density)
 
 symbolFromData :: SymbolData -> Symbol
 symbolFromData symbolData@(SymbolData _ minX_ maxX_ minY_ maxY_ weight_) = Symbol 
@@ -209,7 +231,9 @@ stripsToSymbolData_cellFolding (a, keys@(keysHead:keysTail), dataMap) ystrip
 
 -- Not safe when newKey == oldKey
 stripsToSymbolData_mergeKeys :: (Ord a) => a -> ([KeyStrip a], M.Map a SymbolData) -> a -> ([KeyStrip a], M.Map a SymbolData)
-stripsToSymbolData_mergeKeys newKey (keystrips, oldMap) oldKey = (correctedStrips, updatedMap)
+stripsToSymbolData_mergeKeys newKey mapState@(keystrips, oldMap) oldKey 
+    | newKey == oldKey = mapState
+    | otherwise = (correctedStrips, updatedMap)
     where oldSymbolData = M.findWithDefault mempty oldKey oldMap
           updatedMap = M.delete oldKey $ M.adjust (mappend oldSymbolData) newKey oldMap
           correctedStrips = flip map keystrips $ \keystrip-> if (stripKey keystrip) == oldKey then swapKey keystrip newKey else keystrip
