@@ -1,5 +1,4 @@
 module Orca.Testing where
-import Orca.Reader.Clustering
 
 import Codec.Picture
 import Codec.Picture.Types

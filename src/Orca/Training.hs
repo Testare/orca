@@ -3,11 +3,9 @@ import Graphics.Image.IO(writeImage,writeImageExact, PNG(..))
 import Orca.Reader.Layout(Symbol, symbolImage)
 import Orca.Helper(display)
 import System.Directory(listDirectory)
+
 {-
-
 Enter filename:
-
-
 -}
 
 fpTrainingDataSet :: FilePath
@@ -47,15 +45,3 @@ addSymbolsToDataSets n (symbol:symbols) = do
         sym <- last <$> getLine :: IO Char
         addSymbolToDataSet x symbol sym 
         addSymbolsToDataSets (succ n) symbols
-
-
-
-
-
-
-
-
-
-
-
-

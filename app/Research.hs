@@ -1,20 +1,22 @@
+import Data.Int(Int64)
+import Data.List(sortOn, intercalate)
+import Data.Ratio
+import Data.Monoid(mconcat)
+import Control.Monad(liftM)
+
 import Orca.Reader.Greyscale
 import Orca.Reader.Processing
 import Orca.Reader.Layout
 import Orca.Training(addSymbolsToDataSets)
 import Orca.Helper
 import Orca.Testing
+
 import Graphics.Image.IO
 import Graphics.Image (dims, Bit, X, VS, Image, RGB (RedRGB, GreenRGB,BlueRGB), RGBA, Readable, rotate90)
 import Graphics.Image.Processing.Filter(sobelOperator,prewittOperator)
 import Graphics.Image.Processing(crop)
 import Graphics.Image.Interface
-import Data.Int(Int64)
-import Data.List(sortOn, intercalate)
-import Data.Ratio
 import qualified Data.Vector.Storable as V
-import Data.Monoid(mconcat)
-import Control.Monad(liftM)
 
 main :: IO ()
 main = do
@@ -31,7 +33,6 @@ ops = [ ("Grey thresholding", threshMain)
       , ("Test splitting", smallSplitTest)
       , ("Test big splitting", splitTest False)
       , ("Test splitting coverage", splitTestCoverage True)
-      , ("Test second splitting", testSplitting2)
       , ("Test filtered splitting", splitTest True)
       , ("Symbol data report", symbolReport)
       , ("Symbol histogram", symbolReport)
@@ -108,16 +109,16 @@ smallSplitTest = do
     divisor <- readLn
     putStrLn "Enter a threshold"
     t <- readLn
+    let doFiltering = False
     trySmallTest (\img -> do
         display img
-        testSplitting img
-        splitRecurse (getSymbolImages img)
+        splitRecurse $ reverse $ sortOn symbolWeight $ (if doFiltering then filter (filterFunc) else id) $ imageToSymbols img
         ) divisor t
     where splitRecurse imgs = do
             putStrLn "Show (n) next symbols: "
             nextImageCount <- readLn
             if nextImageCount == 0 then return () else do
-                sequence $ Prelude.map display (take nextImageCount imgs)
+                sequence $ Prelude.map (display . symbolImage) (take nextImageCount imgs)
                 splitRecurse (drop nextImageCount imgs)
 
 testTraining :: Bool -> IO ()
@@ -148,7 +149,6 @@ splitTest doFiltering = do
     t <- readLn
     tryBigTest (\img -> do
         display img
-        testSplitting img
         splitRecurse $ reverse $ sortOn symbolWeight $ (if doFiltering then filter (filterFunc) else id) $ imageToSymbols img
         ) divisor t
     where splitRecurse imgs = do
