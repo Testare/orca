@@ -1,6 +1,5 @@
 /.stack-work
 *.o
 *.docx
-/data/attempts/*/*.png
-/data/attempts/*/*_stats.txt
+/old
 *.tiff

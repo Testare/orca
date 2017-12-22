@@ -1,9 +1,0 @@
-tri-color 4 cluster, binary 1 cluster:
-Drawing red!
-Average: (105,97,81)
-d^?Drawing green!
-Average: (188,181,135)
-Drawing blue!
-Average: (30,26,22)
-Drawing white!
-Average: (188,181,135)

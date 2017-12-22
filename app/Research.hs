@@ -7,7 +7,7 @@ import Control.Monad(liftM)
 import Orca.Reader.Greyscale
 import Orca.Reader.Processing
 import Orca.Reader.Layout
-import Orca.Training(addSymbolsToDataSets)
+import Orca.Training(addSymbolsToDataSets3)
 import Orca.Helper
 import Orca.Testing
 
@@ -138,7 +138,7 @@ testTraining doFiltering1 = do
         putStrLn $ "Total Symbols: " ++ (show $ length $ symbolList )
         putStrLn "Skip n symbols? "
         k <- readLn
-        addSymbolsToDataSets k $ drop k $ symbolList
+        addSymbolsToDataSets3 k $ drop k $ symbolList
         ) divisor t
 
 splitTest :: Bool -> IO ()
@@ -155,7 +155,7 @@ splitTest doFiltering = do
             putStrLn "Show (n) next symbols: "
             nextImageCount <- readLn
             if nextImageCount == 0 then return () else do
-                sequence $ Prelude.map (display . symbolImage) (take nextImageCount imgs)
+                sequence $ Prelude.map ( display . symbolImage) (take nextImageCount imgs)
                 splitRecurse (drop nextImageCount imgs)
 
 filterFunc :: Symbol -> Bool
