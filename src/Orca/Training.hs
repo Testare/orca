@@ -1,6 +1,6 @@
 module Orca.Training where
 import Graphics.Image.IO(writeImage,writeImageExact, PNG(..))
-import Orca.Reader.Layout(Symbol, symbolImage)
+import Orca.Reader.Types(Symbol, symbolImage)
 import Orca.Helper(display)
 import Control.Concurrent(threadDelay)
 

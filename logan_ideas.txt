@@ -1,0 +1,11 @@
+Classification should be
+
+classifySymbol :: Classification -> (Symbol) -> [DataSets] -> (SymbolName)
+
+classifySymbols :: Classification -> [(Symbol)] -> [DataSets] -> [(SymbolNames)]
+
+(Symbol) might need to be different than the symbol currently used in Orca.Reader.Types, since the classification might not need the location data? 
+
+DataSets are (DataSetType, [(Image, SymbolName)]) or something like that
+
+DataSetType = ImageData | Eigenfaces

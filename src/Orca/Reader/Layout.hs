@@ -9,7 +9,7 @@ module Orca.Reader.Layout
     , overlaySymbolCoverages
     ) where
 import Orca.Reader.Layout.ParseSymbols
-import Orca.Reader.Layout.Types
+import Orca.Reader.Types
 
 import Data.Tuple(swap)
 

@@ -4,9 +4,11 @@ import Data.Ratio
 import Data.Monoid(mconcat)
 import Control.Monad(liftM)
 
+import Orca.App(selectOp)
 import Orca.Reader.Greyscale
 import Orca.Reader.Processing
 import Orca.Reader.Layout
+--import Orca.Reader.Types
 import Orca.Training(addSymbolsToDataSets3)
 import Orca.Helper
 import Orca.Testing
@@ -19,15 +21,8 @@ import Graphics.Image.Interface
 import qualified Data.Vector.Storable as V
 
 main :: IO ()
-main = do
-    putStrLn "/* Choose op */"
-    putStrLn $ displayOps ops
-    integer <- readLn
-    snd $ ops !! integer
-
-
-ops :: [(String, IO ())]
-ops = [ ("Grey thresholding", threshMain)
+main = selectOp $ 
+      [ ("Grey thresholding", threshMain)
       , ("Prewitt operator", prewittMain) 
       , ("Test battery", runFullTests)
       , ("Test splitting", smallSplitTest)
@@ -38,9 +33,6 @@ ops = [ ("Grey thresholding", threshMain)
       , ("Symbol histogram", symbolReport)
       , ("Test training", testTraining False)
       ]
-
-testFilteredSplitting :: IO ()
-testFilteredSplitting = putStrLn "Coming soon!"
 
 symbolHistogram :: IO ()
 symbolHistogram = do
@@ -169,8 +161,3 @@ filterFunc_long = (\x-> maximum x < 5*(minimum x) ). (<*>) [fst,snd] . pure . sy
 
 filterFunc_small :: Symbol -> Bool
 filterFunc_small = ((<) 10) . symbolWeight
-
-displayOps :: [(String, IO ())] -> String
-displayOps = disp 0 
-    where disp n [] = ""
-          disp n (x:xs) = (show n) ++ ". " ++ (fst x) ++ "\n" ++ (disp (succ n) xs)

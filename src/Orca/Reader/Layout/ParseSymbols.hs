@@ -1,7 +1,7 @@
 module Orca.Reader.Layout.ParseSymbols
     ( imageToSymbols
     ) where
-import Orca.Reader.Layout.Types
+import Orca.Reader.Types
 
 import Data.Maybe
 import Data.List as L
