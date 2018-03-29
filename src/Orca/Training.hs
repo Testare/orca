@@ -1,6 +1,6 @@
 module Orca.Training where
 import Graphics.Image.IO(writeImage,writeImageExact, PNG(..))
-import Orca.Reader.Types(Symbol, symbolImage)
+import Orca.Reader.Types(Symbol, SymbolName, symbolImage, symbolNameLength)
 import Orca.Helper(display)
 import Control.Concurrent(threadDelay)
 
@@ -12,8 +12,6 @@ import System.Directory(listDirectory)
 Enter filename:
 -}
 
-type SymbolName = [Char]
-
 fpTrainingDataSet :: FilePath
 fpTrainingDataSet = "./data/training/"
 fpTestingDataSet :: FilePath
@@ -21,7 +19,6 @@ fpTestingDataSet = "./data/test_symbols/"
 fpEigenfaces :: FilePath
 fpEigenfaces = "./data/eigen/"
 
-symbolNameLength = 4
 
 stringToSymbol :: [Char] -> SymbolName
 stringToSymbol str = take symbolNameLength $ fstChr:str ++ (repeat '_')

@@ -2,6 +2,7 @@ module Orca.Reader.Classification
     ( ClassificationMethod(..)
     , classifySymbol
     ) where
+
 import Orca.Reader.Types
 
 import Graphics.Image(Array, Image, VS, Pixel, toLists, resize, Bilinear(Bilinear), Border(Edge))
@@ -13,9 +14,6 @@ import qualified Data.Map as M
 import Control.Applicative(ZipList(..), getZipList)
 
 {- * Data stuff, should probably be hoisted to its own module -}
-
-data DatasetType = AlphaData | EigenData | ZetaData deriving(Eq)
-type Dataset cs e = (DatasetType, M.Map String (Image VS cs e))
 
 classifySymbol :: (Array VS cs e) => Params -> [Dataset cs e] -> Symbol -> String
 classifySymbol params = classifySymbol' (paramClassificationMethod params) (paramImageComparisonDims params)

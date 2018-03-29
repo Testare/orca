@@ -12,6 +12,7 @@ import Orca.Reader.Layout
 import Orca.Training(addSymbolsToDataSets3)
 import Orca.Helper
 import Orca.Testing
+import Orca.Reader.Data
 
 import Graphics.Image.IO
 import Graphics.Image (dims, Bit, X, VS, Image, RGB (RedRGB, GreenRGB,BlueRGB), RGBA, Readable, rotate90)
@@ -22,7 +23,8 @@ import qualified Data.Vector.Storable as V
 
 main :: IO ()
 main = selectOp $ 
-      [ ("Grey thresholding", threshMain)
+      [ ("Check Data Test", checkDataMain)
+      {-, ("Grey thresholding", threshMain)
       , ("Prewitt operator", prewittMain) 
       , ("Test battery", runFullTests)
       , ("Test splitting", smallSplitTest)
@@ -31,8 +33,15 @@ main = selectOp $
       , ("Test filtered splitting", splitTest True)
       , ("Symbol data report", symbolReport)
       , ("Symbol histogram", symbolReport)
-      , ("Test training", testTraining False)
+      , ("Test training", testTraining False)-}
       ]
+
+checkDataMain :: IO ()
+checkDataMain = do
+    k <- readDatasetFolder "data/alpha_datasets/orcaset1.5" 
+    sequence $ putStrLn <$> ("- " ++) <$> fst <$> k
+    display $ snd $ head $ k
+    return ()
 
 symbolHistogram :: IO ()
 symbolHistogram = do
