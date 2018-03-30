@@ -8,9 +8,14 @@ import Graphics.Image.ColorSpace
 import System.Directory(listDirectory)
 import System.FilePath((</>))
 
+import qualified Data.Map as M
 
-readDatasetFolder :: String -> IO [(String, Image VS X Bit)]
-readDatasetFolder = readDatasetFolder' 
+{- Is a dataset a monoid candidate? -}
+combineDatasets :: M.Map String [Image VS X Bit] -> M.Map String [BitImage] -> M.Map String [BitImage]
+combineDatasets = M.unionWith mappend
+
+readDatasetFolder :: String -> IO (M.Map String [Image VS X Bit])
+readDatasetFolder = ((M.fromListWith mappend) <$>) . ((map (pure <$>)) <$>) . readDatasetFolder'
 
 readDatasetFolder' :: HipIO.Readable img PNG => String -> IO [(String, img)]
 readDatasetFolder' fp = do
@@ -23,6 +28,7 @@ readDatasetFolder' fp = do
 
 filenameToSymbolName :: String -> String
 filenameToSymbolName = take symbolNameLength . tail
+
 --readDatasetFolder' :: String -> [(Image VS X Bit, String)]
 --readDatasetFolder' fp = ((hipIO.readImageExact PNG . (fp ++ )) <$>) <$> (\x -> (x, take 5 x)) <$> listDirectory fp
 

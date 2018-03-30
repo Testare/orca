@@ -69,6 +69,7 @@ executable research
   default-extensions:  FlexibleContexts
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
+                     , containers
                      , orca
                      , hip >= 1.5
                      , vector

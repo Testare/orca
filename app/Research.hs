@@ -2,6 +2,7 @@ import Data.Int(Int64)
 import Data.List(sortOn, intercalate)
 import Data.Ratio
 import Data.Monoid(mconcat)
+import qualified Data.Map.Strict as M
 import Control.Monad(liftM)
 
 import Orca.App(selectOp)
@@ -18,8 +19,10 @@ import Graphics.Image.IO
 import Graphics.Image (dims, Bit, X, VS, Image, RGB (RedRGB, GreenRGB,BlueRGB), RGBA, Readable, rotate90)
 import Graphics.Image.Processing.Filter(sobelOperator,prewittOperator)
 import Graphics.Image.Processing(crop)
-import Graphics.Image.Interface
+--import Graphics.Image.Interface
 import qualified Data.Vector.Storable as V
+
+
 
 main :: IO ()
 main = selectOp $ 
@@ -39,8 +42,8 @@ main = selectOp $
 checkDataMain :: IO ()
 checkDataMain = do
     k <- readDatasetFolder "data/alpha_datasets/orcaset1.5" 
-    sequence $ putStrLn <$> ("- " ++) <$> fst <$> k
-    display $ snd $ head $ k
+    sequence $ putStrLn <$> (\(a,b) -> '-':a ++ ':':(show $ length b)) <$> (M.toList k)
+    sequence $ (map display) $ snd $ head $ (M.toList k)
     return ()
 
 symbolHistogram :: IO ()
