@@ -2,10 +2,13 @@ import Data.Int(Int64)
 import Data.List(sortOn, intercalate)
 import Data.Ratio
 import Data.Monoid(mconcat)
-import qualified Data.Map.Strict as M
-import Control.Monad(liftM)
+import qualified Data.Map as M
+import Control.Monad(liftM,void)
 
 import Orca.App(selectOp)
+import Orca.Reader.Data
+import Orca.Reader.Types
+import Orca.Reader.Classification
 import Orca.Reader.Greyscale
 import Orca.Reader.Processing
 import Orca.Reader.Layout
@@ -13,7 +16,6 @@ import Orca.Reader.Layout
 import Orca.Training(addSymbolsToDataSets3)
 import Orca.Helper
 import Orca.Testing
-import Orca.Reader.Data
 
 import Graphics.Image.IO
 import Graphics.Image (dims, Bit, X, VS, Image, RGB (RedRGB, GreenRGB,BlueRGB), RGBA, Readable, rotate90)
@@ -27,6 +29,7 @@ import qualified Data.Vector.Storable as V
 main :: IO ()
 main = selectOp $ 
       [ ("Check Data Test", checkDataMain)
+      , ("Test classification", testClassification)
       {-, ("Grey thresholding", threshMain)
       , ("Prewitt operator", prewittMain) 
       , ("Test battery", runFullTests)
@@ -39,9 +42,29 @@ main = selectOp $
       , ("Test training", testTraining False)-}
       ]
 
+adataToDataset :: AlphaData -> Dataset X Bit
+adataToDataset = (\x -> (Alpha, x)) . M.map head 
+
+testClassification :: IO ()
+testClassification = do
+    putStrLn "more to do"
+    trainingData <- adataToDataset <$> readAlphaDataFolder "data/alpha_datasets/orcaset1"
+    testingData <- adataToDataset <$> readAlphaDataFolder "data/alpha_datasets/orcaset1.5"
+    let k = classifySymbol defaultParams [trainingData] . bitimageToBasicSymbol
+    let test3 = bitimageToBasicSymbol <$> M.lookup "w___" (snd testingData)
+    let results = M.toList $ M.map k (snd testingData)
+    putStrLn $ show $ test3
+    putStrLn $ show $ trainingData
+    putStrLn $ show $ classifySymbol defaultParams [trainingData] <$> test3
+    putStrLn "-"
+    putStrLn $ show $ results
+    putStrLn $ show $ (fromIntegral $ length $ filter (\(x,y) -> x == y) results)/(fromIntegral $ length results)
+
 checkDataMain :: IO ()
 checkDataMain = do
-    k <- readDatasetFolder "data/alpha_datasets/orcaset1.5" 
+    k1 <- readAlphaDataFolder "data/alpha_datasets/orcaset1" 
+    k15 <- readAlphaDataFolder "data/alpha_datasets/orcaset1.5" 
+    let k = combineDatasets k1 k15
     sequence $ putStrLn <$> (\(a,b) -> '-':a ++ ':':(show $ length b)) <$> (M.toList k)
     sequence $ (map display) $ snd $ head $ (M.toList k)
     return ()
@@ -58,6 +81,7 @@ symbolHistogram = do
         sequence $ Prelude.map (putStrLn . show . symbolWeight) symbols
         return ()
         ) divisor t
+
 splitTestCoverage :: Bool -> IO ()
 splitTestCoverage doFiltering1 = do
     putStrLn "(0) Alphabet, (1) Test Image"

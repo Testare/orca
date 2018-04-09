@@ -1,16 +1,26 @@
 module Orca.Reader.Types where
 
-import Graphics.Image(Image, VS, X, Y, RGB, Bit)
-import Data.Ratio(Ratio)
+import Graphics.Image(Image, VS, X, Y, RGB, Bit, dims)
+import Data.Ratio(Ratio, (%))
 import qualified Data.Map as M
 
+type BitImage = Image VS X Bit
+type GrayImage = Image VS Y Double
+type ColorImage = Image VS RGB Double
+
 type Dataset cs e = (DatasetType, M.Map String (Image VS cs e))
-data DatasetType = AlphaData | EigenData | ZetaData deriving(Eq)
+data DatasetType = Alpha | Eigen | Zeta deriving(Eq,Show)
+
+type AlphaData = M.Map String [BitImage]
+type EigenData = M.Map String [GrayImage]
+type ZetaData = M.Map String ColorImage
+
 data TDataset = TDataset 
-                    { alpha :: M.Map String [BitImage]
-                    , eigen :: M.Map String [GrayImage]
-                    , zeta :: M.Map String ColorImage
+                    { alpha :: AlphaData
+                    , eigen :: EigenData
+                    , zeta :: ZetaData
                     }
+
 instance Monoid TDataset where
     mempty = TDataset M.empty M.empty M.empty
     mappend (TDataset a e z) (TDataset a' e' z') =  TDataset (M.unionWith mappend a a') (M.unionWith mappend e e') (M.union z z')
@@ -19,10 +29,6 @@ data ClassificationMethod = SimpleClassification | PCAClassifiction deriving (Re
 
 type SymbolName = [Char]
 
-type BitImage = Image VS X Bit
-type GrayImage = Image VS Y Double
-type ColorImage = Image VS RGB Double
-
 symbolNameLength = 4
 isValidSymbolName :: [Char] -> Bool
 isValidSymbolName = (==) symbolNameLength . length
@@ -30,10 +36,20 @@ isValidSymbolName = (==) symbolNameLength . length
 data Symbol = Symbol
     { symbolDims :: (Int, Int) --height, width
     , symbolOffset :: (Int, Int)
-    , symbolImage :: Image VS X Bit
+    , symbolImage :: BitImage
     , symbolWeight :: Int
     , symbolDensity :: Ratio Int
     }
+
+bitimageToBasicSymbol :: BitImage -> Symbol
+bitimageToBasicSymbol bi = Symbol 
+                        { symbolDims = dims bi
+                        , symbolOffset = (0,0)
+                        , symbolImage = bi
+                        , symbolWeight = 0 --Just some random default
+                        , symbolDensity = 1 % 1 --Just some random default
+}
+
 
 data Params = Params
     { paramPercentRadius :: Double
@@ -42,6 +58,14 @@ data Params = Params
     , paramClassificationMethod :: ClassificationMethod
     , paramImageComparisonDims :: (Int, Int)
     }
+defaultParams :: Params
+defaultParams = Params 
+                    { paramPercentRadius = 5
+                    , paramThreshold = 5
+                    , paramFiltering = True
+                    , paramClassificationMethod = SimpleClassification
+                    , paramImageComparisonDims = (100,100)
+                    }
 
 instance Show Symbol where
     show (Symbol (h,w) (x,y) _ weight density) = (show w) ++ 'x':(show h) ++ ' ':(show (x,y)) ++ ' ':'w':':':(show weight) ++ ' ':'D':':':(show density)

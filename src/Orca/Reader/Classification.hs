@@ -21,7 +21,7 @@ classifySymbol params = classifySymbol' (paramClassificationMethod params) (para
 classifySymbol' :: (Array VS cs e) => ClassificationMethod -> (Int, Int) -> [Dataset cs e] -> Symbol -> String
 classifySymbol' PCAClassifiction icDims datasets symbol = "Stub"
 classifySymbol' SimpleClassification icDims datasets symbol = findMinDistanceValue distanceData
-    where goodData = concat $ map (M.toList . snd) $ filter ((==) AlphaData . fst) datasets
+    where goodData = concat $ map (M.toList . snd) $ filter ((==) Alpha . fst) datasets
           distanceData = map (\(nam, img) -> (nam, simpleCompareImages (symbolImage symbol) img)) goodData
 
 findMinDistanceValue :: (Ord a) => [(String, a)] -> String

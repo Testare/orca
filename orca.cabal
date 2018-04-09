@@ -2,7 +2,7 @@ name:                orca
 version:             0.1.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/githubuser/orca#readme
+homepage:            https://github.com/testare/orca#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Author name here
@@ -24,6 +24,7 @@ library
                      , Orca.Reader.Layout
                      , Orca.Reader.Classification
                      , Orca.Reader.Types
+                     , Orca.Reader.PCA
                      , Orca.Testing
                      , Orca.Training
                      , Orca.Helper
@@ -63,7 +64,8 @@ executable reader-app
                      , random
   default-language:    Haskell2010
 
-executable research
+executable r
+  --research
   hs-source-dirs:      app
   main-is:             Research.hs
   default-extensions:  FlexibleContexts
@@ -76,7 +78,8 @@ executable research
                      , random
   default-language:    Haskell2010
 
-executable training
+executable t 
+  --training
   hs-source-dirs:      app
   main-is:             Training.hs
   default-extensions:  FlexibleContexts
