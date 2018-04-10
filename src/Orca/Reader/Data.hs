@@ -50,7 +50,7 @@ readDatasetFolder' fp = do
     where f acc (_, (Left _)) = acc
           f acc (str, (Right img)) = (str,img):acc
 
-filenameToSymbolName :: String -> String
+filenameToSymbolName :: String -> SymbolName
 filenameToSymbolName = take symbolNameLength . tail
 
 --readDatasetFolder' :: String -> [(Image VS X Bit, String)]

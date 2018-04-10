@@ -1,6 +1,6 @@
 module Orca.Training where
 import Graphics.Image.IO(writeImage,writeImageExact, PNG(..))
-import Orca.Reader.Types(Symbol, SymbolName, symbolImage, symbolNameLength)
+import Orca.Reader.Types(Symbol, SymbolName, symbolImage, symbolNameLength, stringToSymbolName)
 import Orca.Helper(display)
 import Control.Concurrent(threadDelay)
 
@@ -19,10 +19,6 @@ fpTestingDataSet = "./data/test_symbols/"
 fpEigenfaces :: FilePath
 fpEigenfaces = "./data/eigen/"
 
-
-stringToSymbol :: [Char] -> SymbolName
-stringToSymbol str = take symbolNameLength $ fstChr:str ++ (repeat '_')
-    where fstChr = if isUpper $ head str then '^' else '_'
 
 symbolFilename :: SymbolName -> Int -> [Char]
 symbolFilename sym i = sym ++ '_':(show i) ++ ".png"
@@ -63,7 +59,7 @@ addSymbolsToDataSets2 fp n symbols = do
           dispSymbol (i,symbol) = do 
               display $ symbolImage symbol
               putStrLn $ (++) (show (i) ++ ": ") $ show symbol
-          f (symbol,word) = if (map toUpper word) == "SKIP" then return () else addSymbolToDataSet fp symbol (stringToSymbol word)
+          f (symbol,word) = if (map toUpper word) == "SKIP" then return () else addSymbolToDataSet fp symbol (stringToSymbolName word)
 
 
 addSymbolsToDataSets :: Int -> [Symbol] -> IO ()

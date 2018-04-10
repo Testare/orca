@@ -11,6 +11,7 @@ import Orca.Reader.Types
 import Orca.Reader.Classification
 import Orca.Reader.Greyscale
 import Orca.Reader.Processing
+import Orca.Reader.PCA
 import Orca.Reader.Layout
 --import Orca.Reader.Types
 import Orca.Training(addSymbolsToDataSets3)
@@ -24,12 +25,11 @@ import Graphics.Image.Processing(crop)
 --import Graphics.Image.Interface
 import qualified Data.Vector.Storable as V
 
-
-
 main :: IO ()
 main = selectOp $ 
       [ ("Check Data Test", checkDataMain)
       , ("Test classification", testClassification)
+      , ("Test eigenfaces", testEigenFaces)
       {-, ("Grey thresholding", threshMain)
       , ("Prewitt operator", prewittMain) 
       , ("Test battery", runFullTests)
@@ -44,6 +44,35 @@ main = selectOp $
 
 adataToDataset :: AlphaData -> Dataset X Bit
 adataToDataset = (\x -> (Alpha, x)) . M.map head 
+
+testEigenFaces :: IO () 
+testEigenFaces = do
+    trainingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1"
+    testingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1.5"
+    putStrLn "What symbol to display?"
+    k <- getLine :: IO String
+    putStrLn (stringToSymbolName k)
+    let (Just w) = M.lookup (tail $ stringToSymbolName k) trainingData
+    let efRaws = generateEigenFaces w
+    let meanVec = meanVector $ imagesToMatrix $ map bitToGrayImage w
+    let ef = eigenFaceToImage <$> efRaws
+    let efs = if ((length ef) < 5) then ef else take 5 ef
+    void $ sequence $ map display efs
+    putStrLn "What symbol to project?"
+    k2 <- getLine :: IO String
+    putStrLn $ stringToSymbolName k2
+    let (Just p) = head <$> M.lookup (tail $ stringToSymbolName k2) testingData
+    display p
+    let biEf = bitImageToEigenFace $ correctDimensions (50,50) $ bitToGrayImage p 
+    putStrLn $ show $ biEf
+    display $ eigenFaceToImage $ biEf
+    putStrLn $ show $ meanVec
+    display $ eigenFaceToImage $ eigenFaceSubtract biEf ((0,0), meanVec)
+    let projection = projectOnFaces (50,50) p meanVec efRaws
+    display $ eigenFaceToImage $ projection
+    putStrLn $ ("Euclidean: " ++) $ show $ euclideanDistance projection
+    putStrLn $ ("Euclidean2: " ++) $ show $ euclideanDistance $ eigenFaceSubtract projection (eigenFaceSubtract biEf ((0,0), meanVec))
+    putStrLn $ ("Euclidean3: " ++) $ show $ euclideanDistance $ eigenFaceSubtract projection biEf
 
 testClassification :: IO ()
 testClassification = do

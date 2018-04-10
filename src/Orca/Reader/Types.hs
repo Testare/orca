@@ -2,10 +2,13 @@ module Orca.Reader.Types where
 
 import Graphics.Image(Image, VS, X, Y, RGB, Bit, dims)
 import Data.Ratio(Ratio, (%))
+import Data.Char(isUpper)
+import Numeric.LinearAlgebra(Vector)
 import qualified Data.Map as M
 
 type BitImage = Image VS X Bit
 type GrayImage = Image VS Y Double
+type EigenFace = ((Int, Int), Vector Double)
 type ColorImage = Image VS RGB Double
 
 type Dataset cs e = (DatasetType, M.Map String (Image VS cs e))
@@ -33,6 +36,10 @@ symbolNameLength = 4
 isValidSymbolName :: [Char] -> Bool
 isValidSymbolName = (==) symbolNameLength . length
 
+stringToSymbolName :: [Char] -> SymbolName
+stringToSymbolName str = take (succ symbolNameLength) $ fstChr:str ++ (repeat '_')
+    where fstChr = if isUpper $ head str then '^' else '_'
+
 data Symbol = Symbol
     { symbolDims :: (Int, Int) --height, width
     , symbolOffset :: (Int, Int)
@@ -57,6 +64,7 @@ data Params = Params
     , paramFiltering :: Bool
     , paramClassificationMethod :: ClassificationMethod
     , paramImageComparisonDims :: (Int, Int)
+    , paramEuclideanDistance :: Bool
     }
 defaultParams :: Params
 defaultParams = Params 
@@ -64,7 +72,8 @@ defaultParams = Params
                     , paramThreshold = 5
                     , paramFiltering = True
                     , paramClassificationMethod = SimpleClassification
-                    , paramImageComparisonDims = (100,100)
+                    , paramImageComparisonDims = (50,50)
+                    , paramEuclideanDistance = False
                     }
 
 instance Show Symbol where
