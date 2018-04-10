@@ -1,5 +1,9 @@
 module Orca.Reader.PCA where 
 
+import Data.Tuple(uncurry)
+import Data.List(sortOn)
+import qualified Data.Map as Map
+
 import Orca.Reader.Types
 --import Orca.Reader.Classification(correctDimensions)
 --import Graphics.Image(Array, Image, VS, Pixel, toLists, resize, Bilinear(Bilinear), Border(Edge))
@@ -10,30 +14,14 @@ import Numeric.LinearAlgebra(tr, compactSVD, toColumns, fromColumns, Vector(..),
 import qualified Numeric.LinearAlgebra as HMat
 import Orca.Helper(display)
 
-testImagesToMatrix :: IO ()
-testImagesToMatrix = do
-    let imgs = [ HIP.fromLists [[PixelY 1.0, PixelY 1.0, PixelY 0.0], [PixelY 0.0, PixelY 1.0, PixelY 0.0]]
-               , HIP.fromLists [[PixelY 1.0, PixelY 0.0, PixelY 0.0], [PixelY 0.0, PixelY 1.0, PixelY 0.0]] 
-               , HIP.fromLists [[PixelY 1.0, PixelY 1.0, PixelY 1.0], [PixelY 1.0, PixelY 0.0, PixelY 0.0]] 
-               ]
-        mg = imagesToMatrix' imgs
-    putStrLn $ show $ mg
-    putStrLn $ show $ toColumns mg
-    putStrLn $ show $ getColumnMean mg
-    putStrLn $ show $ averageColumns mg
-    let (u,_,_) = compactSVD (averageColumns mg)
-    putStrLn $ show $ u
-    putStrLn $ show $ map (sum . (map (** 2)) . toList ) $ toColumns u
-    let pv = projectVector' (head $ toColumns mg) (head $ toColumns u)
-    putStrLn $ show $ pv
-    putStrLn $ show $ projectVector'  
-        (fromList [0.0, 1.0, 0.0, 0.0, 1.0, 1.0])
-        (head $ toColumns u)
-    display $ eigenFaceToImage ((2,3), snd pv)
-
-{- public -}
-manhattanDistance :: EigenFace -> Double
-manhattanDistance = foldl1 (+) . map abs . toList . snd
+testAccuracy :: (Int, Int) -> EData -> Map.Map String BitImage -> String -> (String, Double, [(String,String)])
+testAccuracy d trainingData testingData ignoreString = (ignoreString, accuracy, classifications)
+    where ignoreSymbols = map (tail . stringToSymbolName . pure) ignoreString
+          actualTestingData = foldl (flip Map.delete) testingData ignoreSymbols
+          eData = foldl (flip Map.delete) trainingData ignoreSymbols
+          classifications = Map.toList $ (`classifyWithEigenData` eData) <$> actualTestingData
+          correctness = map (uncurry (==)) $ classifications
+          accuracy = (fromIntegral $ length $ filter id correctness)/(fromIntegral $ length correctness)
 
 {- public -}
 euclideanDistance :: EigenFace -> Double
@@ -56,6 +44,17 @@ bitImageToEigenFace img = (d, fromList $ map (head . toListPx) $ concat $ HIP.to
     where d = dims img
 
 {- public -}
+alphaDataToEigenData :: (Int,Int) -> AlphaData -> EData
+alphaDataToEigenData d = fmap (generateEigenFaces'' d)
+
+classifyWithEigenData :: BitImage -> EData -> String
+classifyWithEigenData bi eData = fst $ head $ sortOn snd $ Map.toList distMap
+    where d = fst $ fst $ snd $ head $ Map.toList eData
+          distMap :: Map.Map String Double
+          distMap = (euclideanDistance . uncurry (distanceWithFaces' d bi)) <$> eData
+
+{- public -}
+
 generateEigenFaces :: [BitImage] -> [EigenFace]
 generateEigenFaces = generateEigenFaces' placeholderDims
 
@@ -63,6 +62,24 @@ generateEigenFaces' :: (Int, Int) -> [BitImage] -> [EigenFace]
 generateEigenFaces' d imgs = map (\x->(d,x)) $ toColumns u
     where grayInput = map (HIP.fromLists . map (map bitToGray) . HIP.toLists) imgs
           (u,_,_) = compactSVD $ averageColumns $ imagesToMatrix'' d grayInput -- Need to fix this to pass DIMS
+
+generateEigenFaces'' :: (Int, Int) -> [BitImage] -> (EigenFace, [EigenFace])
+generateEigenFaces'' d imgs = (mFace, map (\x->(d,x)) $ toColumns u)
+    where grayInput = map (HIP.fromLists . map (map bitToGray) . HIP.toLists) imgs
+          m = imagesToMatrix'' d grayInput
+          (u,_,_) = compactSVD $ averageColumns $ m -- Need to fix this to pass DIMS
+          mFace = meanFace d m
+
+distanceWithFaces :: (Int, Int) -> BitImage -> EigenFace -> [EigenFace] -> EigenFace
+distanceWithFaces d bi meanFace efs = eigenFaceSubtract (d,projEfVector) (eigenFaceSubtract biEf meanFace)
+    where biEf = flip eigenFaceSubtract meanFace $ (\x -> (d,fromList x)) $ map (toDouble . head . toListPx) $ concat $ HIP.toLists $ correctDimensions d bi
+          projEfVector = foldl1 add $ map (projectVector (snd biEf) . snd) efs
+
+{- Should be renamed to "eigenSpaceDifference" -}
+distanceWithFaces' :: (Int, Int) -> BitImage -> EigenFace -> [EigenFace] -> EigenFace
+distanceWithFaces' d bi meanFace efs = eigenFaceSubtract projection (eigenFaceSubtract biEf meanFace)
+    where projection = projectOnFaces d bi (snd meanFace) efs
+          biEf = bitImageToEigenFace $ correctDimensions d $ bitToGrayImage bi
 
 {- public -}
 projectOnFaces :: (Int, Int) -> BitImage -> Vector Double -> [EigenFace] -> EigenFace

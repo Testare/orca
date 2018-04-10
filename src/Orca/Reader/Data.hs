@@ -1,4 +1,4 @@
-module Orca.Reader.Data (readEigenDataFolder, readAlphaDataFolder, combineDatasets) where
+module Orca.Reader.Data (readEigenDataFolder, readAlphaDataFolder, readZetaDataFolder, combineDatasets) where
 
 import Orca.Reader.Types
 
@@ -18,6 +18,7 @@ readData :: DatasetType -> FilePath -> IO TDataset
 readData Alpha = readAlphaData
 readData Eigen = readEigenData
 readData Zeta = readZetaData
+--readData Eigen = error "Not currently implemented"
 
 {-Private-}
 readAlphaData :: FilePath -> IO TDataset

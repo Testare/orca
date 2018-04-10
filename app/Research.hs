@@ -1,9 +1,9 @@
 import Data.Int(Int64)
-import Data.List(sortOn, intercalate)
+import Data.List(sortOn, intercalate, nub)
 import Data.Ratio
 import Data.Monoid(mconcat)
 import qualified Data.Map as M
-import Control.Monad(liftM,void)
+import Control.Monad(forever, liftM, void)
 
 import Orca.App(selectOp)
 import Orca.Reader.Data
@@ -30,6 +30,8 @@ main = selectOp $
       [ ("Check Data Test", checkDataMain)
       , ("Test classification", testClassification)
       , ("Test eigenfaces", testEigenFaces)
+      , ("Accuracy of PCA", eigenFaceAccuracy)
+      , ("Test zeta", testZeta)
       {-, ("Grey thresholding", threshMain)
       , ("Prewitt operator", prewittMain) 
       , ("Test battery", runFullTests)
@@ -39,11 +41,59 @@ main = selectOp $
       , ("Test filtered splitting", splitTest True)
       , ("Symbol data report", symbolReport)
       , ("Symbol histogram", symbolReport)
-      , ("Test training", testTraining False)-}
+      , ("Test training", testTraining False)
+      -}
       ]
 
 adataToDataset :: AlphaData -> Dataset X Bit
 adataToDataset = (\x -> (Alpha, x)) . M.map head 
+
+testZeta :: IO () 
+testZeta = do
+    testData <- readZetaDataFolder "data/zeta_datasets/z1"
+    trainingData1 <- readAlphaDataFolder "data/alpha_datasets/orcaset1"
+    trainingData2 <- readAlphaDataFolder "data/alpha_datasets/orcaset1.5"
+    let eData = alphaDataToEigenData (50,50) (trainingData1 `mappend` trainingData2)
+    putStrLn "bweh?"
+     
+
+eigenFaceAccuracy :: IO ()
+eigenFaceAccuracy = do 
+    trainingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1"
+    testingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1.5"
+    joshSet <- readAlphaDataFolder "data/alpha_datasets/jorca"
+    let eData = alphaDataToEigenData (50,50) (mappend trainingData joshSet)
+    let testDat = head <$> testingData
+    let symbols = fst <$> M.toList joshSet
+    let simpleTest = testAccuracy (50,50) eData testDat "]"
+    sequence $ map putStrLn $ (\(_,_,x)-> (map show) x) simpleTest
+    putStrLn $ show $ simpleTest
+    let (_,_,classi) = simpleTest
+    let ignoreAllThose = nub $ head . snd <$> filter (\(x,y) -> x /= y) classi
+    putStrLn $ ignoreAllThose
+    putStrLn $ show $ length $ ignoreAllThose
+    let betterTest = testAccuracy (50,50) eData testDat ignoreAllThose
+    sequence $ map putStrLn $ (\(_,_,x)-> (map show) x) betterTest
+    putStrLn $ show $ betterTest
+
+getTo80 :: IO ()
+getTo80 = do
+    trainingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1"
+    testingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1.5"
+    joshSet <- readAlphaDataFolder "data/alpha_datasets/jorca"
+    let eData = alphaDataToEigenData (50,50) (mappend trainingData joshSet)
+    let testDat = head <$> testingData
+    let symbols = fst <$> M.toList testingData
+    let simpleTest = testAccuracy (50,50) eData testDat "]"
+    sequence $ map putStrLn $ (\(_,_,x)-> (map show) x) simpleTest
+    putStrLn $ show $ simpleTest
+    let (_,_,classi) = simpleTest
+    let ignoreAllThose = nub $ head . snd <$> filter (\(x,y) -> x /= y) classi
+    putStrLn $ ignoreAllThose
+    putStrLn $ show $ length $ ignoreAllThose
+    let betterTest = testAccuracy (50,50) eData testDat ignoreAllThose
+    sequence $ map putStrLn $ (\(_,_,x)-> (map show) x) betterTest
+    putStrLn $ show $ betterTest
 
 testEigenFaces :: IO () 
 testEigenFaces = do
@@ -53,26 +103,36 @@ testEigenFaces = do
     k <- getLine :: IO String
     putStrLn (stringToSymbolName k)
     let (Just w) = M.lookup (tail $ stringToSymbolName k) trainingData
+
     let efRaws = generateEigenFaces w
     let meanVec = meanVector $ imagesToMatrix $ map bitToGrayImage w
     let ef = eigenFaceToImage <$> efRaws
     let efs = if ((length ef) < 5) then ef else take 5 ef
     void $ sequence $ map display efs
-    putStrLn "What symbol to project?"
-    k2 <- getLine :: IO String
-    putStrLn $ stringToSymbolName k2
-    let (Just p) = head <$> M.lookup (tail $ stringToSymbolName k2) testingData
-    display p
-    let biEf = bitImageToEigenFace $ correctDimensions (50,50) $ bitToGrayImage p 
-    putStrLn $ show $ biEf
-    display $ eigenFaceToImage $ biEf
-    putStrLn $ show $ meanVec
-    display $ eigenFaceToImage $ eigenFaceSubtract biEf ((0,0), meanVec)
-    let projection = projectOnFaces (50,50) p meanVec efRaws
-    display $ eigenFaceToImage $ projection
-    putStrLn $ ("Euclidean: " ++) $ show $ euclideanDistance projection
-    putStrLn $ ("Euclidean2: " ++) $ show $ euclideanDistance $ eigenFaceSubtract projection (eigenFaceSubtract biEf ((0,0), meanVec))
-    putStrLn $ ("Euclidean3: " ++) $ show $ euclideanDistance $ eigenFaceSubtract projection biEf
+    putStrLn "What symbol to classify?"
+    k3 <- getLine :: IO String
+    let eData = alphaDataToEigenData (50,50) trainingData
+    let (Just target) = head <$> M.lookup (tail $ stringToSymbolName k3) testingData
+    putStrLn $ "Classified as: " ++ (classifyWithEigenData target eData)
+    
+    forever $ do 
+        putStrLn "What symbol to project?"
+        k2 <- getLine :: IO String
+        putStrLn $ stringToSymbolName k2
+        let (Just p) = head <$> M.lookup (tail $ stringToSymbolName k2) testingData
+        display p
+        let biEf = bitImageToEigenFace $ correctDimensions (50,50) $ bitToGrayImage p 
+        --putStrLn $ show $ biEf
+        --display $ eigenFaceToImage $ biEf
+        --putStrLn $ show $ meanVec
+        --display $ eigenFaceToImage $ eigenFaceSubtract biEf ((0,0), meanVec)
+        let projection = projectOnFaces (50,50) p meanVec efRaws
+        let result = eigenFaceSubtract projection (eigenFaceSubtract biEf ((0,0), meanVec))
+        display $ eigenFaceToImage $ result
+        putStrLn $ ("Euclidean: " ++) $ show $ euclideanDistance projection
+        putStrLn $ ("Euclidean2: " ++) $ show $ euclideanDistance $ eigenFaceSubtract projection (eigenFaceSubtract biEf ((0,0), meanVec))
+        putStrLn $ ("Euclidean2.5: " ++) $ show $ euclideanDistance $ distanceWithFaces' (50,50) p ((0,0),meanVec) efRaws 
+        putStrLn $ ("Euclidean3: " ++) $ show $ euclideanDistance $ eigenFaceSubtract projection biEf
 
 testClassification :: IO ()
 testClassification = do

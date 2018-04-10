@@ -18,6 +18,8 @@ type AlphaData = M.Map String [BitImage]
 type EigenData = M.Map String [GrayImage]
 type ZetaData = M.Map String ColorImage
 
+type EData = M.Map String (EigenFace,[EigenFace])
+
 data TDataset = TDataset 
                     { alpha :: AlphaData
                     , eigen :: EigenData
@@ -59,13 +61,14 @@ bitimageToBasicSymbol bi = Symbol
 
 
 data Params = Params
-    { paramPercentRadius :: Double
-    , paramThreshold :: Int
+    { paramPercentRadius :: Int
+    , paramThreshold :: Double
     , paramFiltering :: Bool
     , paramClassificationMethod :: ClassificationMethod
     , paramImageComparisonDims :: (Int, Int)
     , paramEuclideanDistance :: Bool
     }
+
 defaultParams :: Params
 defaultParams = Params 
                     { paramPercentRadius = 5

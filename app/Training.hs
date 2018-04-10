@@ -46,16 +46,17 @@ testTraining doFiltering1 = do
 
 testTraining2 :: Bool -> IO ()
 testTraining2 doFiltering1 = do
-    putStrLn "(0) Alphabet, (1) Test Image"
+    putStrLn "(0) Alphabet, (1) Test Image, (2) Enter file"
     imageIndex <- readLn
+    userSelectedFile <- if (imageIndex == 2) then getLine else return ""
     putStrLn "Filter? (True/False) "
     doFiltering <- readLn
     putStrLn "Enter a divisor"
     divisor <- readLn
     putStrLn "Enter a threshold"
     t <- readLn
-    tryThresholdingWith ([testAlphabetSource,testBigImageSource] !! imageIndex) JPG (\img -> do
-        let modifiedImg = ([id, rotate90] !! imageIndex) img
+    tryThresholdingWith ([testAlphabetSource,testBigImageSource, userSelectedFile] !! imageIndex) JPG (\img -> do
+        let modifiedImg = ([id, rotate90, id] !! imageIndex) img
         display modifiedImg
         let symbolList = reverse $ sortOn symbolWeight $ (if doFiltering then filter (filterFunc) else id) $ imageToSymbols modifiedImg
         putStrLn $ "Total Symbols: " ++ (show $ length $ symbolList )
