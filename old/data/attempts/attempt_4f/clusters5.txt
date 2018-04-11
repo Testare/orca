@@ -1,0 +1,28 @@
+fromList [(PixelRGB8 19 18 17,PixelRGB8 63 127 63),(PixelRGB8 31 28 21,PixelRGB8 63 127 127),(PixelRGB8 37 34 29,PixelRGB8 63 63 63),(PixelRGB8 44 36 26,PixelRGB8 63 63 127),(PixelRGB8 180 173 120,PixelRGB8 63 63 191),(PixelRGB8 191 179 133,PixelRGB8 63 63 255)]
+Three clusters
+[MeanCluster (PixelRGB8 37 34 29) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 44 36 26) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 180 173 120) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 191 179 133) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 19 18 17) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 31 28 21) APX{A[0/0]A[0/0]A[0/0]}
+]
+Iterated clusters
+[MeanCluster (PixelRGB8 37 34 29) APX{A[476835/12462]A[409579/12462]A[361925/12462]}
+,MeanCluster (PixelRGB8 44 36 26) APX{A[1670414/27239]A[1468301/27239]A[1203072/27239]}
+,MeanCluster (PixelRGB8 180 173 120) APX{A[12277296/73155]A[11771170/73155]A[8701153/73155]}
+,MeanCluster (PixelRGB8 191 179 133) APX{A[24547890/123537]A[23670179/123537]A[17852732/123537]}
+,MeanCluster (PixelRGB8 19 18 17) APX{A[1067194/50010]A[904303/50010]A[824034/50010]}
+,MeanCluster (PixelRGB8 31 28 21) APX{A[933135/31285]A[782477/31285]A[681182/31285]}
+]
+Three iteration clusters
+[MeanCluster (PixelRGB8 43 37 31) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 79 71 59) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 169 162 120) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 199 192 145) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 20 17 15) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 27 23 21) APX{A[0/0]A[0/0]A[0/0]}
+]
+Writing...
+Writing rainbow..
+Completed!

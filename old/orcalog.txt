@@ -1,0 +1,21 @@
+/* Choose op */
+0. Grey thresholding
+1. Prewitt operator
+2. Test battery
+3. Test splitting
+4. Test big splitting
+5. Test splitting coverage
+6. Test filtered splitting
+7. Symbol data report
+8. Symbol histogram
+9. Test training
+
+(0) Alphabet, (1) Test Image
+Filter? (True/False) 
+Enter a divisor
+Enter a threshold
+Total Symbols: 377
+Skip n symbols? 
+0: 37x46 (800,909) w:1071 D:1071 % 1702
+(0) Quit, (1) Training, (2) Testing DataSet, (3) Skip?
+Finished

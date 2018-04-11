@@ -1,0 +1,27 @@
+Three clusters
+[MeanCluster (PixelRGB8 21 17 14) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 179 173 128) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 115 115 117) APX{A[0/0]A[0/0]A[0/0]}
+]
+Iterated clusters
+[MeanCluster (PixelRGB8 21 17 14) APX{A[3660361/115557]A[3129902/115557]A[2698715/115557]}
+,MeanCluster (PixelRGB8 179 173 128) APX{A[35995678/190455]A[34644360/190455]A[25895979/190455]}
+,MeanCluster (PixelRGB8 115 115 117) APX{A[1316725/11676]A[1231747/11676]A[1029404/11676]}
+]
+Chewed clusters
+[MeanCluster (PixelRGB8 31 27 23) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 188 181 135) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 112 105 88) APX{A[0/0]A[0/0]A[0/0]}
+]
+One iteration clusters
+[MeanCluster (PixelRGB8 31 27 23) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 188 181 135) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 112 105 88) APX{A[0/0]A[0/0]A[0/0]}
+]
+Two iteration clusters
+[MeanCluster (PixelRGB8 31 26 23) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 189 181 136) APX{A[0/0]A[0/0]A[0/0]}
+,MeanCluster (PixelRGB8 110 102 85) APX{A[0/0]A[0/0]A[0/0]}
+]
+Writing...
+Completed!
