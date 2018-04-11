@@ -6,9 +6,12 @@ module Orca.Reader.Layout
     , symbolWeight 
     , symbolDensity
     , imageToSymbols
+    , orderSymbolsToString
+    , orderSymbolsToStrings
     , overlaySymbolCoverages
     ) where
-import Orca.Reader.Layout.ParseSymbols
+import Orca.Reader.Layout.Grouping(orderSymbolsToString, orderSymbolsToStrings)
+import Orca.Reader.Layout.ParseSymbols(imageToSymbols)
 import Orca.Reader.Types
 
 import Data.Tuple(swap)

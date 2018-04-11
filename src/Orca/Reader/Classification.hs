@@ -1,9 +1,12 @@
 module Orca.Reader.Classification 
     ( ClassificationMethod(..)
+    , classifySymbols
     , classifySymbol
     ) where
 
 import Orca.Reader.Types
+import Orca.Reader.PCA(classifyWithEigenData)
+import Orca.Reader.Data(onlyAccepting)
 
 import Graphics.Image(Array, Image, VS, Pixel, toLists, resize, Bilinear(Bilinear), Border(Edge))
 import Graphics.Image.Interface(toWord8, toListPx)
@@ -15,6 +18,11 @@ import Control.Applicative(ZipList(..), getZipList)
 
 {- * Data stuff, should probably be hoisted to its own module -}
 
+classifySymbols :: Params -> EData -> [Symbol] -> String
+classifySymbols params@Params{paramAlphabetString = acceptStr} edata symbols = map (head . classify . symbolImage) symbols
+    where classify = flip classifyWithEigenData (edata `onlyAccepting` acceptStr)
+
+{- Out of date-}
 classifySymbol :: (Array VS cs e) => Params -> [Dataset cs e] -> Symbol -> String
 classifySymbol params = classifySymbol' (paramClassificationMethod params) (paramImageComparisonDims params)
 

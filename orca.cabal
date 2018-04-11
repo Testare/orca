@@ -18,6 +18,7 @@ library
   default-extensions:  FlexibleContexts
   exposed-modules:     Lib
                      , Orca.App
+                     , Orca.Reader
                      , Orca.Reader.Data
                      , Orca.Reader.Processing
                      , Orca.Reader.Greyscale
@@ -29,6 +30,7 @@ library
                      , Orca.Training
                      , Orca.Helper
   other-modules:       Orca.Reader.Layout.ParseSymbols
+                     , Orca.Reader.Layout.Grouping
   build-depends:       base >= 4.7 && < 5
                      , JuicyPixels
                      , hip >= 1.5

@@ -1,5 +1,5 @@
 import Data.Int(Int64)
-import Data.List(sortOn, intercalate, nub)
+import Data.List(sort, sortOn, intercalate, nub)
 import Data.Ratio
 import Data.Monoid(mconcat)
 import qualified Data.Map as M
@@ -32,6 +32,9 @@ main = selectOp $
       , ("Test eigenfaces", testEigenFaces)
       , ("Accuracy of PCA", eigenFaceAccuracy)
       , ("Test zeta", testZeta)
+      , ("Get to 80", getToX 0.8)
+      , ("Get to 90", getToX 0.9)
+      , ("FULL TEST", testFullStack)
       {-, ("Grey thresholding", threshMain)
       , ("Prewitt operator", prewittMain) 
       , ("Test battery", runFullTests)
@@ -45,6 +48,38 @@ main = selectOp $
       -}
       ]
 
+testFullStack :: IO ()
+testFullStack = do
+    let params = defaultParams --{paramPercentRadius=10}
+    fp <- getLine
+    img <- either (const Nothing) Just <$> readImage fp
+    let bI = adaptiveThresholdParams params . colorToGrey <$> img
+    flip (maybe (return ())) bI $ \bitImg -> do
+        trainingData <- fmap (foldl1 (M.unionWith mappend)) $ sequence $ (map readAlphaDataFolder (paramAlphaTrainingData params) :: [IO AlphaData])
+        --putStrLn $ show $ (paramAlphaTrainingData params)
+        --putStrLn $ show $ trainingData
+        let eData = alphaDataToEigenData (paramImageComparisonDims params) trainingData
+        display bitImg
+        let theSymbols = orderSymbolsToStrings params $ imageToSymbols bitImg
+        --void $ sequence $ map (putStrLn . (++ "+ : ") . show . (sequence [symbolDims, symbolOffset])) (concat theSymbols)
+        void $ sequence $ map (putStrLn . classifySymbols params eData) theSymbols
+
+        --eData <- alphaDataToEigenData (dims bitImg) trainingData
+
+
+{-
+orcaReadImage :: Params -> EData -> ColorImage -> String
+orcaReadImage params edata img = classifySymbols params edata syms
+    where bi = adaptiveThresholdParams params $ colorToGrey img 
+          syms = orderSymbolsToString params $ imageToSymbols bi
+
+orcaReadImageIO :: Params -> FilePath -> IO (Maybe String)
+orcaReadImageIO params@Params{paramImageComparisonDims = d, paramAlphaTrainingData = trainingDataPaths} fp = do
+    trainingData <- fmap mconcat $ sequence $ (map readAlphaDataFolder trainingDataPaths :: [IO AlphaData])
+    let eData = alphaDataToEigenData d trainingData
+    img <- readImage fp
+    return $ orcaReadImage params eData <$> either (const Nothing) (Just) img 
+-}
 adataToDataset :: AlphaData -> Dataset X Bit
 adataToDataset = (\x -> (Alpha, x)) . M.map head 
 
@@ -72,37 +107,40 @@ eigenFaceAccuracy = do
     let ignoreAllThose = nub $ head . snd <$> filter (\(x,y) -> x /= y) classi
     putStrLn $ ignoreAllThose
     putStrLn $ show $ length $ ignoreAllThose
-    let betterTest = testAccuracy (50,50) eData testDat ignoreAllThose
+    let betterTest = testAccuracy (50,50) eData testDat ignoreString_accept26 --ignoreAllThose
     sequence $ map putStrLn $ (\(_,_,x)-> (map show) x) betterTest
     putStrLn $ show $ betterTest
 
-getTo80 :: IO ()
-getTo80 = do
+getToX :: Double -> IO ()
+getToX x = do
     trainingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1"
     testingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1.5"
     joshSet <- readAlphaDataFolder "data/alpha_datasets/jorca"
     let eData = alphaDataToEigenData (50,50) (mappend trainingData joshSet)
     let testDat = head <$> testingData
     let symbols = fst <$> M.toList testingData
-    let simpleTest = testAccuracy (50,50) eData testDat "]"
-    sequence $ map putStrLn $ (\(_,_,x)-> (map show) x) simpleTest
-    putStrLn $ show $ simpleTest
-    let (_,_,classi) = simpleTest
-    let ignoreAllThose = nub $ head . snd <$> filter (\(x,y) -> x /= y) classi
-    putStrLn $ ignoreAllThose
-    putStrLn $ show $ length $ ignoreAllThose
-    let betterTest = testAccuracy (50,50) eData testDat ignoreAllThose
-    sequence $ map putStrLn $ (\(_,_,x)-> (map show) x) betterTest
-    putStrLn $ show $ betterTest
+    igStr <- buildIgnoreString "" eData testDat
+    let accepted = sort $ filter (`notElem` igStr) (map head symbols)
+    putStrLn $ ((++) "Accepted: ") $ accepted
+    putStrLn $ (show (length accepted)) ++ '/':(show (length symbols))
+
+    where buildIgnoreString igStr eData testDat = do
+            let (_,acc,classi) = testAccuracy (50,50) eData testDat igStr
+            putStrLn $ (show acc) ++ ' ':igStr
+            if acc >= x || ((length igStr) > 60) then putStrLn ((++) "Ignored: " (sort igStr)) >> return igStr else do
+                let ignoreAllThose = nub $ (++ igStr) $ head . snd <$> filter (\(x,y) -> x /= y) classi
+                buildIgnoreString ignoreAllThose eData testDat
 
 testEigenFaces :: IO () 
 testEigenFaces = do
     trainingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1"
     testingData <- readAlphaDataFolder "data/alpha_datasets/orcaset1.5"
+    trainingData2 <- readAlphaDataFolder "data/alpha_datasets/jorca"
+    let fullTrainingData = M.unionWith mappend trainingData trainingData2
     putStrLn "What symbol to display?"
     k <- getLine :: IO String
     putStrLn (stringToSymbolName k)
-    let (Just w) = M.lookup (tail $ stringToSymbolName k) trainingData
+    let (Just w) = M.lookup (tail $ stringToSymbolName k) fullTrainingData
 
     let efRaws = generateEigenFaces w
     let meanVec = meanVector $ imagesToMatrix $ map bitToGrayImage w
@@ -111,7 +149,7 @@ testEigenFaces = do
     void $ sequence $ map display efs
     putStrLn "What symbol to classify?"
     k3 <- getLine :: IO String
-    let eData = alphaDataToEigenData (50,50) trainingData
+    let eData = alphaDataToEigenData (50,50) fullTrainingData
     let (Just target) = head <$> M.lookup (tail $ stringToSymbolName k3) testingData
     putStrLn $ "Classified as: " ++ (classifyWithEigenData target eData)
     

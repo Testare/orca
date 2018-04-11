@@ -59,7 +59,6 @@ bitimageToBasicSymbol bi = Symbol
                         , symbolDensity = 1 % 1 --Just some random default
 }
 
-
 data Params = Params
     { paramPercentRadius :: Int
     , paramThreshold :: Double
@@ -67,16 +66,24 @@ data Params = Params
     , paramClassificationMethod :: ClassificationMethod
     , paramImageComparisonDims :: (Int, Int)
     , paramEuclideanDistance :: Bool
+    , paramAlphabetString :: String
+    , paramAlphaTrainingData :: [FilePath]
     }
 
 defaultParams :: Params
 defaultParams = Params 
-                    { paramPercentRadius = 5
-                    , paramThreshold = 5
+                    { paramPercentRadius = 4
+                    , paramThreshold = 3
                     , paramFiltering = True
                     , paramClassificationMethod = SimpleClassification
                     , paramImageComparisonDims = (50,50)
                     , paramEuclideanDistance = False
+                    , paramAlphabetString = "(+12359=@AEIJPW^_bjmoprvwz" 
+                    , paramAlphaTrainingData = (++) "data/alpha_datasets/" <$>
+                                                [ "jorca"
+                                                , "orcaset1"
+                                                , "orcaset1.5"
+                                                ]
                     }
 
 instance Show Symbol where

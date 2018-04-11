@@ -153,6 +153,9 @@ adaptiveThresholdRatio divisor t img = adaptiveThreshold t intImg img
 adaptiveThresholdParams :: Params -> GrayImage -> BitImage
 adaptiveThresholdParams Params{paramPercentRadius=pr, paramThreshold=t} = adaptiveThresholdRatio pr t
 
+colorToGrey :: ColorImage -> GrayImage
+colorToGrey = toImageY
+
 threePxLine :: Image VS X Bit
 threePxLine = fromVector (3,1) $ generate 3 (\i -> on)
 
