@@ -2,9 +2,9 @@
 
 This was my BYU-I Senior Project, completed in 2018. The goal of the project was to implement an OCR that would read an alphabet I made-up of about 30 unique characters.
 
-![Like this](https://github.com/Testare/orca/blob/main/data/zeta_datasets/rt/r%5BApbJ35@2jz9_om+PWv%5B%5B1rp%5BAo(3%5B=%5EmbWE@_wv+=95(pI.jpg?raw=true)
+![Like this](data/rty.jpg)
 
-I created a training set of data by writing out the symbols myself in a [Rocketbook](https://getrocketbook.com/) (a notebook with pages designed to be scanned into google drive with an app) a few times, and then getting some additional training data by having friends copy the symbols themselves, and making the images black/white.
+I created a training set of data by writing out the symbols myself in a [Rocketbook](https://getrocketbook.com/) (a notebook with pages designed to be scanned intodata/rty.jpg google drive with an app) a few times, and then getting some additional training data by having friends copy the symbols themselves, and making the images black/white.
 
 I would then reduce the images to binary vectors and do [dimensionality reduction](https://en.wikipedia.org/wiki/Dimensionality_reduction) to produce a handful of [Eigenfaces](https://en.wikipedia.org/wiki/Eigenface) for each symbol, which was the ML part of the project. To categorize an image of a character, the program would mathematically project it onto the eigenfaces for each character, and then compare the result to the actual image. The closest result would be chosen as the winner.
 
